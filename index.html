@@ -46,6 +46,8 @@
     .download:active { transform: translateY(1px); }
     .download svg { flex: none; }
     .meta { font-size: 13.5px; color: var(--text-3); }
+    .other { color: var(--text-2); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(255, 255, 255, .25); }
+    .other:hover { color: var(--text); text-decoration-color: rgba(255, 255, 255, .6); }
     .meta .live { display: inline-block; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%; background: var(--live); box-shadow: 0 0 8px rgba(126, 226, 160, .7); vertical-align: 2px; }
 
     .window { position: relative; margin: 72px auto 0; max-width: 980px; border-radius: 14px; overflow: hidden; border: 1px solid var(--line);
@@ -66,6 +68,7 @@
       font-weight: 600; font-size: 15px; border: 1px solid rgba(255, 255, 255, .22); color: var(--text); }
     .steps h3 { font-size: 18px; font-weight: 600; letter-spacing: -.01em; }
     .steps p { margin-top: 4px; color: var(--text-2); font-size: 15.5px; }
+    .steps p.linux { margin-top: 8px; }
     .steps p b { color: var(--text); font-weight: 500; }
     code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: .9em; padding: 2px 7px; border-radius: 6px; background: rgba(255, 255, 255, .07); color: var(--text); }
     .shot { border-radius: 12px; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 40px 100px rgba(0, 0, 0, .7); }
@@ -103,9 +106,10 @@
     <div class="cta">
       <a class="download" id="download" href="https://github.com/nivodev17/umbra-launcher/releases/latest">
         <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v10M5.5 8.5 10 13l4.5-4.5M4 16.5h12"/></svg>
-        Download for Windows
+        <span id="dl-label">Download for Windows</span>
       </a>
-      <p class="meta" id="meta"><span class="live" aria-hidden="true"></span>Windows 10 and 11</p>
+      <p class="meta" id="meta"><span class="live" aria-hidden="true"></span><span id="meta-text">Windows 10 and 11</span></p>
+      <p class="meta"><a class="other" id="other" href="https://github.com/nivodev17/umbra-launcher/releases/latest">Download for Linux</a></p>
     </div>
     <div class="window"><img src="img/home.webp" width="845" height="720" alt="The Umbra launcher home screen with the Play button"></div>
   </header>
@@ -116,7 +120,8 @@
       <p class="sub">You need an invite code from someone who's already in. Then it takes about two minutes.</p>
       <div class="steps">
         <ol>
-          <li><h3>Run the installer</h3><p>Download it above and open it. The launcher installs itself and opens.</p></li>
+          <li><h3>Run the installer</h3><p>On Windows, open the file you downloaded. The launcher installs itself and opens.</p>
+            <p class="linux">On Linux, extract the archive and run <code>./install.sh</code> inside it once. It asks for your password one time, then adds Umbra Launcher to your app menu.</p></li>
           <li><h3>Create your Umbra account</h3><p>Choose <b>Have an invite? Create an account</b>, enter your code (it looks like <code>UMBRA-K7QM-3XPD</code>), and pick a username and password.</p></li>
           <li><h3>Add your Minecraft account and press Play</h3><p>Sign in with Microsoft like the normal launcher. The first Play downloads Minecraft, Fabric, Java and Umbra for you. After that, updates arrive on their own.</p></li>
         </ol>
@@ -128,6 +133,7 @@
         <div>
           <h3>If Windows says it protected your PC</h3>
           <p>The installer isn't signed with a paid certificate, so Windows SmartScreen may stop it the first time. Click <b>More info</b>, then <b>Run anyway</b>.</p>
+          <p>On Linux the Roblox tab is hidden, because Roblox doesn't run there. Everything else works the same.</p>
         </div>
       </div>
     </section>
@@ -147,18 +153,28 @@
   </footer>
 
   <script>
-    // Point the button straight at the newest installer, and say which version it is.
+    // The big button is for this computer (Linux or Windows); the small link under it is the other one.
+    // Both point straight at the newest files from the latest release.
     (async () => {
+      const linux = /Linux/.test(navigator.userAgent) && !/Android/.test(navigator.userAgent);
+      const main = linux ? 'linux' : 'windows';
+      const label = { windows: 'Download for Windows', linux: 'Download for Linux' };
+      const note = { windows: 'Windows 10 and 11', linux: '64-bit Linux, .tar.gz' };
+      document.getElementById('dl-label').textContent = label[main];
+      document.getElementById('meta-text').textContent = note[main];
+      document.getElementById('other').textContent = label[linux ? 'windows' : 'linux'];
       try {
         const r = await fetch('https://api.github.com/repos/nivodev17/umbra-launcher/releases/latest');
         if (!r.ok) return;
         const rel = await r.json();
-        const exe = (rel.assets || []).find((a) => /\.exe$/i.test(a.name));
-        if (!exe) return;
-        document.getElementById('download').href = exe.browser_download_url;
-        const mb = Math.round(exe.size / 1048576);
-        document.getElementById('meta').lastChild.textContent = `Version ${rel.tag_name.replace(/^v/, '')}, ${mb} MB, Windows 10 and 11`;
-      } catch { /* the button still opens the releases page */ }
+        const find = (os) => (rel.assets || []).find((a) => os === 'linux' ? /linux.*\.tar\.gz$/i.test(a.name) : /\.exe$/i.test(a.name));
+        const mine = find(main), other = find(linux ? 'windows' : 'linux');
+        if (mine) {
+          document.getElementById('download').href = mine.browser_download_url;
+          document.getElementById('meta-text').textContent = `Version ${rel.tag_name.replace(/^v/, '')}, ${Math.round(mine.size / 1048576)} MB, ${note[main]}`;
+        }
+        if (other) document.getElementById('other').href = other.browser_download_url;
+      } catch { /* the buttons still open the releases page */ }
     })();
   </script>
 </body>
