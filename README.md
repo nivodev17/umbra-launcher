@@ -2,4 +2,4 @@
 
 The Umbra launcher. Invite only.
 
-Site: https://jacespecial13-stack.github.io/umbra-launcher/ - downloads: [latest release](https://github.com/jacespecial13-stack/umbra-launcher/releases/latest)
+Site: https://nivodev17.github.io/umbra-launcher/ - downloads: [latest release](https://github.com/nivodev17/umbra-launcher/releases/latest)

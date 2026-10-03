@@ -101,7 +101,7 @@
     <h1 class="mark" aria-label="Umbra"><span>U</span><span>M</span><span>B</span><span>R</span><span>A</span></h1>
     <p class="lede">The Umbra client for <b>Minecraft 1.21</b>, and the launcher that installs everything it needs. Invite only.</p>
     <div class="cta">
-      <a class="download" id="download" href="https://github.com/jacespecial13-stack/umbra-launcher/releases/latest">
+      <a class="download" id="download" href="https://github.com/nivodev17/umbra-launcher/releases/latest">
         <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v10M5.5 8.5 10 13l4.5-4.5M4 16.5h12"/></svg>
         Download for Windows
       </a>
@@ -150,7 +150,7 @@
     // Point the button straight at the newest installer, and say which version it is.
     (async () => {
       try {
-        const r = await fetch('https://api.github.com/repos/jacespecial13-stack/umbra-launcher/releases/latest');
+        const r = await fetch('https://api.github.com/repos/nivodev17/umbra-launcher/releases/latest');
         if (!r.ok) return;
         const rel = await r.json();
         const exe = (rel.assets || []).find((a) => /\.exe$/i.test(a.name));
